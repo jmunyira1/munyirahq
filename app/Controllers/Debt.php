@@ -3,29 +3,29 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\Party as PartyModel;
-use App\Models\PartyContact; // ← fix: add the use statement
+use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\Debt as DebtModel;
 
-class Party extends BaseController
+class Debt extends BaseController
 {
     public function index()
     {
-        return view('parties/index');
+        return view('debts/index');
     }
 
     public function list()
     {
-        $parties = (new PartyModel)->findAllWithContacts();
-        return view('parties/partials/list', ['parties' => $parties]);
+        $debts = (new DebtModel)->findAllWithParty();
+        return view('debts/partials/list', ['debts' => $debts]);
     }
 
     public function form($id = null)
     {
         $data = [];
-        $partyModel = new PartyModel();
+        $DebtModel = new DebtModel();
 
         if ($id !== null) {
-            $party = $partyModel->find($id);
+            $party = $DebtModel->find($id);
             if (!$party) {
                 return $this->response->setStatusCode(404)->setBody('Party not found');
             }
@@ -46,12 +46,12 @@ class Party extends BaseController
             $data['party'] = $party;
         }
 
-        return view('parties/partials/form', $data);
+        return view('debts/partials/form', $data);
     }
 
     public function store()
     {
-        $partyModel = new PartyModel();
+        $DebtModel = new DebtModel();
 
         $gender = $this->request->getPost('gender');
         $data = [
@@ -67,8 +67,8 @@ class Party extends BaseController
                 ->setJSON(['error' => 'Full name is required.']);
         }
 
-        $partyModel->save($data);
-        $partyId = $partyModel->getInsertID();
+        $DebtModel->save($data);
+        $partyId = $DebtModel->getInsertID();
 
         $this->_saveContacts($partyId);
 
@@ -77,8 +77,8 @@ class Party extends BaseController
 
     public function update(int $id)
     {
-        $partyModel = new PartyModel();
-        $party = $partyModel->find($id);
+        $DebtModel = new DebtModel();
+        $party = $DebtModel->find($id);
 
         if (!$party) {
             return $this->response->setStatusCode(404)->setBody('Party not found.');
@@ -98,44 +98,11 @@ class Party extends BaseController
                 ->setJSON(['error' => 'Full name is required.']);
         }
 
-        $partyModel->update($id, $data);
+        $DebtModel->update($id, $data);
 
         (new PartyContact)->where('party_id', $id)->delete();
         $this->_saveContacts($id);
 
         return $this->_successResponse('refreshPartyList','Party updated successfully.');
-    }
-
-    private function _saveContacts(int $partyId): void
-    {
-        $contactModel = new PartyContact(); // ← now resolves correctly
-
-        $phones = $this->request->getPost('phone') ?? [];
-        $phones = is_array($phones) ? $phones : [$phones];
-
-        $emails = $this->request->getPost('email') ?? [];
-        $emails = is_array($emails) ? $emails : [$emails];
-
-        foreach ($phones as $phone) {
-            $phone = trim((string) $phone);
-            if ($phone !== '') {
-                $contactModel->save([
-                    'party_id'      => $partyId,
-                    'contact_type'  => 'phone',
-                    'contact_value' => $phone,
-                ]);
-            }
-        }
-
-        foreach ($emails as $email) {
-            $email = trim((string) $email);
-            if ($email !== '') {
-                $contactModel->save([
-                    'party_id'      => $partyId,
-                    'contact_type'  => 'email',
-                    'contact_value' => $email,
-                ]);
-            }
-        }
     }
 }

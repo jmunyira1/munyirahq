@@ -6,8 +6,15 @@
 </li>
 <li class="nav-item">
     <a href="<?= url_to('parties') ?>" class="nav-link">
-        <i class="nav-icon bi bi-palette"></i>
+        <i class="nav-icon bi bi-people"></i>
         <p>Parties</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="<?= url_to('debts') ?>" class="nav-link">
+        <i class="nav-icon bi bi-cash-coin"></i>
+        <p>Debts</p>
     </a>
 </li>
 

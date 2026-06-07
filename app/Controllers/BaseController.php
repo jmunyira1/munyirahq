@@ -42,4 +42,14 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
     }
+    protected function _successResponse(string $updated,string $message): \CodeIgniter\HTTP\ResponseInterface
+    {
+        return $this->response
+            ->setStatusCode(200)
+            ->setHeader('HX-Trigger', json_encode([
+                'showToast' => ['message' => $message, 'type' => 'success'],
+                'closeModal' => true,
+                $updated => true,
+            ]));
+    }
 }
