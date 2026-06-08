@@ -5,7 +5,6 @@ use CodeIgniter\Router\RouteCollection;
 /** @var RouteCollection $routes */
 
 $routes->get('/', 'Home::index');
-
 $routes->group('parties', ['namespace' => 'App\Controllers'], function ($routes) {
     // GET Requests
     $routes->get('/',              'Party::index',      ['as' => 'parties']);
@@ -18,8 +17,6 @@ $routes->group('parties', ['namespace' => 'App\Controllers'], function ($routes)
     $routes->post('update/(:num)',  'Party::update/$1',  ['as' => 'party.update']);
     $routes->post('delete/(:num)',  'Party::delete/$1',  ['as' => 'party.delete']);
 });
-
-
 $routes->group('debts', ['namespace' => 'App\Controllers'], function ($routes) {
     // GET Requests
     $routes->get('/',              'Debt::index',      ['as' => 'debts']);
@@ -32,4 +29,14 @@ $routes->group('debts', ['namespace' => 'App\Controllers'], function ($routes) {
     $routes->post('update/(:num)',  'Debt::update/$1',  ['as' => 'debt.update']);
     $routes->post('delete/(:num)',  'Debt::delete/$1',  ['as' => 'debt.delete']);
 });
+$routes->group('accounts', ['namespace' => 'App\Controllers'], function ($routes) {
+    $routes->get('/', 'Account::index', ['as' => 'accounts']);
+    $routes->get('list', 'Account::list', ['as' => 'accounts.list']);
+    $routes->get('form', 'Account::form', ['as' => 'account.form']);
+    $routes->get('form/(:num)', 'Account::form/$1', ['as' => 'account.edit']);
+    $routes->post('store', 'Account::store', ['as' => 'account.store']);
+    $routes->post('update/(:num)', 'Account::update/$1', ['as' => 'account.update']);
+    $routes->post('destroy/(:num)', 'Account::destroy/$1', ['as' => 'account.destroy']);
+});
+
 service('auth')->routes($routes);

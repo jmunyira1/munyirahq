@@ -10,6 +10,12 @@
         <p>Parties</p>
     </a>
 </li>
+<li class="nav-item">
+    <a href="<?= url_to('accounts') ?>" class="nav-link">
+        <i class="nav-icon bi bi-cash-stack"></i>
+        <p>Accounts</p>
+    </a>
+</li>
 
 <li class="nav-item">
     <a href="<?= url_to('debts') ?>" class="nav-link">
