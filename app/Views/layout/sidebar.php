@@ -21,6 +21,11 @@
         <i class="nav-icon bi bi-card-text"></i>
         <p>Categories</p>
     </a>
+</li><li class="nav-item">
+    <a href="<?= url_to('transactions') ?>" class="nav-link">
+        <i class="nav-icon bi bi-table"></i>
+        <p>Transactions</p>
+    </a>
 </li>
 
 <li class="nav-item">

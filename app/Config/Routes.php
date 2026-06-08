@@ -43,12 +43,22 @@ $routes->group('accounts', ['namespace' => 'App\Controllers'], function ($routes
 // ── Categories ────────────────────────────────────────────────────────────────
 $routes->group('categories', ['namespace' => 'App\Controllers'], function ($routes) {
 
-$routes->get('/', 'Category::index', ['as' => 'categories']);
-$routes->get('list', 'Category::list', ['as' => 'categories.list']);
-$routes->get('form', 'Category::form', ['as' => 'category.form']);      // create (optional ?parent_id=N)
-$routes->get('form/(:num)', 'Category::form/$1', ['as' => 'category.edit']);      // edit
-$routes->post('store', 'Category::store', ['as' => 'category.store']);
-$routes->post('update/(:num)', 'Category::update/$1', ['as' => 'category.update']);
-$routes->post('destroy/(:num)', 'Category::destroy/$1', ['as' => 'category.destroy']);});
+    $routes->get('/', 'Category::index', ['as' => 'categories']);
+    $routes->get('list', 'Category::list', ['as' => 'categories.list']);
+    $routes->get('form', 'Category::form', ['as' => 'category.form']);      // create (optional ?parent_id=N)
+    $routes->get('form/(:num)', 'Category::form/$1', ['as' => 'category.edit']);      // edit
+    $routes->post('store', 'Category::store', ['as' => 'category.store']);
+    $routes->post('update/(:num)', 'Category::update/$1', ['as' => 'category.update']);
+    $routes->post('destroy/(:num)', 'Category::destroy/$1', ['as' => 'category.destroy']);});
+
+$routes->group('transactions', ['namespace' => 'App\Controllers'], function ($routes) {
+
+    $routes->get('/', 'Transaction::index', ['as' => 'transactions']);
+    $routes->get('list', 'Transaction::list', ['as' => 'transactions.list']);
+    $routes->get('form', 'Transaction::form', ['as' => 'transaction.form']);      // create (optional ?parent_id=N)
+    $routes->get('form/(:num)', 'Transaction::form/$1', ['as' => 'transaction.edit']);      // edit
+    $routes->post('store', 'Transaction::store', ['as' => 'transaction.store']);
+    $routes->post('update/(:num)', 'Transaction::update/$1', ['as' => 'transaction.update']);
+    $routes->post('destroy/(:num)', 'Transaction::destroy/$1', ['as' => 'transaction.destroy']);});
 
 service('auth')->routes($routes);
