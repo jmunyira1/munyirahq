@@ -1,93 +1,107 @@
 <?php
 
-function _partyInitials(array $p): string
+function _partyInitials(array $debt): string
 {
-    $parts = explode(' ', trim($p['name']));
+    $parts = explode(' ', trim($debt['name'] ?? ''));
     $i = strtoupper($parts[0][0] ?? '?');
     if (count($parts) >= 2) $i .= strtoupper($parts[count($parts) - 1][0]);
     return $i;
 }
 
-
-
-function genderLabel(array $p): string
+function genderLabel(array $debt): string
 {
-    if (!$p['is_person']) return '—';
-    if ($p['gender'] === null || $p['gender'] === '') return '—';
-    return $p['gender'] == 1 ? 'Female' : 'Male';
+    if (!($debt['is_person'] ?? false)) return '—';
+    if (($debt['gender'] ?? null) === null || $debt['gender'] === '') return '—';
+    return $debt['gender'] == 1 ? 'Female' : 'Male';
 }
 
-function genderPrefix(array $p): string
+function genderPrefix(array $debt): string
 {
-    if (!$p['is_person'] || $p['gender'] === null || $p['gender'] === '') return '';
-    return $p['gender'] == 1 ? 'Ms. ' : 'Mr. ';
+    if (!($debt['is_person'] ?? false) || ($debt['gender'] ?? null) === null || $debt['gender'] === '') return '';
+    return $debt['gender'] == 1 ? 'Ms. ' : 'Mr. ';
 }
 
 ?>
 
-<!-- ════════════════════════════════════════════ CARDS VIEW ══════════════ -->
-<div class="parties-cards row g-3">
-
-    <?php if (empty($parties)): ?>
-        <div class="col-12 text-center text-muted py-5">
-            <i class="bi bi-people fs-1 d-block mb-3 opacity-25"></i>
-            <p class="mb-0">No parties yet. Click <strong>New Party</strong> to get started.</p>
-        </div>
-    <?php endif; ?>
-
-    <?php foreach ($parties as $p): ?>
-        <div class="col-md-6 col-xxl-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-start gap-3">
-
-
-                    <div class="flex-grow-1 min-w-0">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                            <div class="min-w-0">
-                                <h6 class="mb-0 text-truncate fw-semibold">
-                                    <?= esc(genderPrefix($p) . $p['name']) ?>
-                                </h6>
-                                <p class="mb-0 text-muted small text-truncate">
-                                    <?= esc($p['title'] ?? '') ?>
-                                </p>
+<div class="table-responsive bg-white shadow-sm rounded">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light text-uppercase fs-7 text-muted">
+        <tr>
+            <th scope="col" class="ps-4">Party Name</th>
+            <th scope="col">Type</th>
+            <th scope="col">Title / Info</th>
+            <th scope="col" class="text-end">Amount</th>
+            <th scope="col" class="text-end pe-4">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php if (empty($debts)): ?>
+            <tr>
+                <td colspan="5" class="text-center text-muted py-5">
+                    <i class="bi bi-cash-stack fs-2 d-block mb-2 opacity-25"></i>
+                    <span>No records found.</span>
+                </td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($debts as $debt): ?>
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar-initials bg-light text-secondary rounded-circle d-flex align-items-center justify-content-center border fw-bold small" style="width: 38px; height: 38px;">
+                                <?= _partyInitials($debt) ?>
                             </div>
-                            <span class="badge <?= $p['is_person'] ? 'text-bg-info' : 'text-bg-secondary' ?> fw-normal flex-shrink-0">
-                                <?= $p['is_person'] ? 'Person' : 'Company' ?>
-                            </span>
+                            <div>
+                                    <span class="fw-semibold d-block text-dark">
+                                        <?= esc(genderPrefix($debt) . $debt['name']) ?>
+                                    </span>
+                                <?php if (!empty($debt['contacts'])): ?>
+                                    <span class="text-muted small">
+                                            <i class="bi bi-<?= $debt['contacts'][0]['contact_type'] === 'phone' ? 'telephone' : 'envelope' ?> me-1"></i>
+                                            <?= esc($debt['contacts'][0]['contact_value']) ?>
+                                        </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
+                    </td>
 
-                        <?php if (!empty($p['contacts'])): ?>
-                            <div class="mt-2 d-flex flex-column gap-1">
-                                <?php foreach ($p['contacts'] as $c): ?>
-                                    <div class="d-flex align-items-center gap-2 small text-muted">
-                                        <i class="bi bi-<?= $c['contact_type'] === 'phone' ? 'telephone' : 'envelope' ?> flex-shrink-0"></i>
-                                        <span class="text-truncate"><?= esc($c['contact_value']) ?></span>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                    <td>
+                            <span class="badge <?= $debt['is_person'] ? 'text-bg-info' : 'text-bg-secondary' ?> fw-normal">
+                                <?= $debt['is_person'] ? 'Person' : 'Company' ?>
+                            </span>
+                    </td>
 
-                <div class="card-footer bg-transparent border-top d-flex justify-content-end gap-2 py-2">
-                    <button class="btn btn-xs btn-outline-secondary"
-                            hx-get="<?= url_to('party.edit' , $p['id']) ?>"
-                            hx-target="#party-modal-body"
-                            hx-swap="innerHTML"
-                            data-bs-toggle="modal"
-                            data-bs-target="#partyModal">
-                        <i class="bi bi-pencil me-1"></i>Edit
-                    </button>
-                    <button class="btn btn-xs btn-outline-danger"
-                            hx-post="<?= base_url('party/destroy/' . $p['id']) ?>"
-                            hx-confirm="Delete <?= esc($p['name']) ?>? This cannot be undone."
-                            hx-target="#parties-list"
-                            hx-swap="innerHTML">
-                        <i class="bi bi-trash me-1"></i>Delete
-                    </button>
-                </div>
-            </div>
-        </div>
-    <?php endforeach; ?>
+                    <td class="text-muted small">
+                        <?= esc($debt['title'] ?? '—') ?>
+                    </td>
 
+                    <td class="text-end fw-bold text-danger">
+                        $<?= number_format($debt['amount'] ?? 0, 2) ?>
+                    </td>
+
+                    <td class="text-end pe-4">
+                        <div class="d-inline-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    hx-get="<?= url_to('debt.edit', $debt['id']) ?>"
+                                    hx-target="#debt-modal-body"
+                                    hx-swap="innerHTML"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#debtModal"
+                                    title="Edit Party">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    hx-post="<?= base_url('debt/destroy/' . $debt['id']) ?>"
+                                    hx-confirm="Delete this debt record? This cannot be undone."
+                                    hx-target="#debts-list"
+                                    hx-swap="innerHTML"
+                                    title="Delete Debt">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        </tbody>
+    </table>
 </div>

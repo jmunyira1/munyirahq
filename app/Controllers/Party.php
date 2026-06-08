@@ -72,7 +72,7 @@ class Party extends BaseController
 
         $this->_saveContacts($partyId);
 
-        return $this->_successResponse('Party created successfully.');
+        return $this->_successResponse('refreshPartyList','Party created successfully.');
     }
 
     public function update(int $id)

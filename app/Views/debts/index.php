@@ -7,7 +7,7 @@
 <?= $this->section('content') ?>
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-
+id
         <button class="btn btn-sm btn-primary"
                 hx-get="<?= url_to('debt.form') ?>"
                 hx-target="#debt-modal-body"
@@ -20,7 +20,7 @@
 
     <div id="debts-list-container"
          hx-get="<?= url_to('debts.list') ?>"
-         hx-trigger="load, refreshDebtsList from:body">
+         hx-trigger="load, refreshDebtList from:body">
     </div>
 
     <div class="modal fade" id="debtModal" tabindex="-1"

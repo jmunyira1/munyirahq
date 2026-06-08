@@ -4,17 +4,15 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class Debt extends Model
+class Account extends Model
 {
-    protected $table            = 'debts';
+    protected $table            = 'accounts';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [
-        'party_id','amount'
-    ];
+    protected $allowedFields    = [];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -45,16 +43,4 @@ class Debt extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-    public function findAllWithParty(int $partyId = null): array
-    {
-        $builder = $this->db->table('debts d')
-            ->select('d.*,p.name, p.is_person, p.gender, p.title, p.id as party_table_id')
-            ->join('parties p', 'p.id = d.party_id');
-
-        if ($partyId !== null) {
-            $builder->where('d.party_id', $partyId);
-        }
-
-        return $builder->get()->getResultArray();
-    }
 }

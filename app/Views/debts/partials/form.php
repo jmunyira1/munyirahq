@@ -32,6 +32,9 @@ $action = $isEdit
             <div class="col-md-6" id="f-Party-wrap">
                 <label for="f-party" class="form-label small fw-semibold text-muted text-uppercase mb-1">Party</label>
                 <select class="form-select form-select-sm" name="party" id="f-party">
+                    <?php foreach ($parties as $party): ?>
+                    <option value="<?= $party['id'] ?>"><?= $party['name'] ?></option>
+                    <?php endforeach; ?>
                       </select>
             </div>
 
