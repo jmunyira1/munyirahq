@@ -16,6 +16,12 @@
         <p>Accounts</p>
     </a>
 </li>
+<li class="nav-item">
+    <a href="<?= url_to('categories') ?>" class="nav-link">
+        <i class="nav-icon bi bi-card-text"></i>
+        <p>Categories</p>
+    </a>
+</li>
 
 <li class="nav-item">
     <a href="<?= url_to('debts') ?>" class="nav-link">

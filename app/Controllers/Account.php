@@ -53,6 +53,35 @@ class Account extends BaseController
 
         return $this->_successResponse('refreshAccountList', 'Account created successfully.');
     }
+    public function update(int $id)
+    {
+        $accountModel   = new AccountModel();
+        $account = $accountModel->find($id);
+
+        if (!$account) {
+            return $this->response->setStatusCode(404)->setBody('Account not found.');
+        }
+
+        $data = [
+            'account_name' => $this->request->getPost('account_name'),
+            'account_type' => $this->request->getPost('account_type'),
+            'currency'     => strtoupper(trim($this->request->getPost('currency') ?: 'KES')),
+            // current_balance is NOT editable via this form after creation —
+            // it is maintained exclusively by transaction operations.
+        ];
+
+        if (!$accountModel->validate($data)) {
+            return $this->response
+                ->setStatusCode(422)
+                ->setJSON(['error' => implode(' ', $accountModel->errors())]);
+        }
+
+        $accountModel->update($id, $data);
+
+        return $this->_successResponse('refreshAccountList', 'Account updated successfully.');
+    }
+
+
 
 
 

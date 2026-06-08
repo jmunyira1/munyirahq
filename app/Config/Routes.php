@@ -39,4 +39,16 @@ $routes->group('accounts', ['namespace' => 'App\Controllers'], function ($routes
     $routes->post('destroy/(:num)', 'Account::destroy/$1', ['as' => 'account.destroy']);
 });
 
+
+// ── Categories ────────────────────────────────────────────────────────────────
+$routes->group('categories', ['namespace' => 'App\Controllers'], function ($routes) {
+
+$routes->get('/', 'Category::index', ['as' => 'categories']);
+$routes->get('list', 'Category::list', ['as' => 'categories.list']);
+$routes->get('form', 'Category::form', ['as' => 'category.form']);      // create (optional ?parent_id=N)
+$routes->get('form/(:num)', 'Category::form/$1', ['as' => 'category.edit']);      // edit
+$routes->post('store', 'Category::store', ['as' => 'category.store']);
+$routes->post('update/(:num)', 'Category::update/$1', ['as' => 'category.update']);
+$routes->post('destroy/(:num)', 'Category::destroy/$1', ['as' => 'category.destroy']);});
+
 service('auth')->routes($routes);
