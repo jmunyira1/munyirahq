@@ -4,7 +4,32 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 
-$routes->get('/', 'Home::index');
+$routes->get('/',                  'Dashboard::index',   ['as' => 'dashboard.index']);
+$routes->get('dashboard',          'Dashboard::index',   ['as' => 'dashboard']);
+$routes->get('dashboard/summary',  'Dashboard::summary', ['as' => 'dashboard.summary']);
+
+
+
+$routes->group('budget-item', ['namespace' => 'App\Controllers'], function ($routes) {
+    // 1. Literal GET routes (Specific matches first)
+    $routes->get('form', 'BudgetItem::form', ['as' => 'budget_items.form']);
+
+    // 2. Wildcard GET routes (Placeholders at the bottom)
+    $routes->get('form/(:num)',    'BudgetItem::form/$1', ['as' => 'budget_items.edit']);
+    $routes->get('(:num)',         'BudgetItem::list/$1', ['as' => 'budget_items.list']);
+
+    // 3. POST actions
+    $routes->post('store',          'BudgetItem::store',      ['as' => 'budget_items.store']);
+    $routes->post('update/(:num)',  'BudgetItem::update/$1',  ['as' => 'budget_items.update']);
+    $routes->post('destroy/(:num)', 'BudgetItem::destroy/$1', ['as' => 'budget_items.destroy']);
+    $routes->post('fulfil/(:num)',  'BudgetItem::fulfil/$1',  ['as' => 'budget_items.fulfil']);
+});
+
+
+
+
+
+
 $routes->group('parties', ['namespace' => 'App\Controllers'], function ($routes) {
     // GET Requests
     $routes->get('/',              'Party::index',      ['as' => 'parties']);
