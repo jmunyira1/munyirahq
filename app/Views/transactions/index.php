@@ -8,7 +8,6 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
 
-        {{-- Type shortcut buttons --}}
         <div class="d-flex gap-2 flex-wrap">
             <button class="btn btn-sm btn-success"
                     hx-get="<?= url_to('transaction.form') ?>?type=income"
@@ -44,7 +43,6 @@
             </button>
         </div>
 
-        {{-- Date / filter controls --}}
         <div class="d-flex gap-2 align-items-center flex-wrap" id="filter-bar">
             <input type="month"
                    class="form-control form-control-sm"
@@ -65,13 +63,11 @@
         </div>
     </div>
 
-    {{-- List container — loaded on page load and refreshed after CUD --}}
     <div id="transactions-list-container"
          hx-get="<?= url_to('transactions.list') ?>?month=<?= date('Y-m') ?>"
          hx-trigger="load, refreshTransactionList from:body">
     </div>
 
-    {{-- Modal --}}
     <div class="modal fade" id="transactionModal" tabindex="-1"
          aria-labelledby="transaction-modal-title" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">

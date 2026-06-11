@@ -65,7 +65,7 @@ class Account extends BaseController
         $data = [
             'account_name' => $this->request->getPost('account_name'),
             'account_type' => $this->request->getPost('account_type'),
-            'currency'     => strtoupper(trim($this->request->getPost('currency') ?: 'KES')),
+            'color'     => strtoupper(trim($this->request->getPost('color'))),
             // current_balance is NOT editable via this form after creation —
             // it is maintained exclusively by transaction operations.
         ];

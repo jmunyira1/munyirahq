@@ -18,16 +18,13 @@ $routes->group('parties', ['namespace' => 'App\Controllers'], function ($routes)
     $routes->post('delete/(:num)',  'Party::delete/$1',  ['as' => 'party.delete']);
 });
 $routes->group('debts', ['namespace' => 'App\Controllers'], function ($routes) {
-    // GET Requests
-    $routes->get('/',              'Debt::index',      ['as' => 'debts']);
-    $routes->get('list',           'Debt::list',       ['as' => 'debts.list']);
-    $routes->get('form',           'Debt::form',       ['as' => 'debt.form']);
-    $routes->get('form/(:num)',    'Debt::form/$1',    ['as' => 'debt.edit']);
-
-    // POST Requests
-    $routes->post('store',          'Debt::store',      ['as' => 'debt.store']);
-    $routes->post('update/(:num)',  'Debt::update/$1',  ['as' => 'debt.update']);
-    $routes->post('delete/(:num)',  'Debt::delete/$1',  ['as' => 'debt.delete']);
+    $routes->get(  '/',               'Debt::index',       ['as' => 'debts']);
+    $routes->get(  'list',          'Debt::list',        ['as' => 'debts.list']);
+    $routes->get(  'form',           'Debt::form',        ['as' => 'debt.form']);
+    $routes->get(  'form/(:num)',    'Debt::form/$1',     ['as' => 'debt.edit']);
+    $routes->post( 'store',          'Debt::store',       ['as' => 'debt.store']);
+    $routes->post( 'update/(:num)',  'Debt::update/$1',   ['as' => 'debt.update']);
+    $routes->post( 'destroy/(:num)', 'Debt::destroy/$1',  ['as' => 'debt.destroy']);
 });
 $routes->group('accounts', ['namespace' => 'App\Controllers'], function ($routes) {
     $routes->get('/', 'Account::index', ['as' => 'accounts']);
@@ -53,12 +50,12 @@ $routes->group('categories', ['namespace' => 'App\Controllers'], function ($rout
 
 $routes->group('transactions', ['namespace' => 'App\Controllers'], function ($routes) {
 
-    $routes->get('/', 'Transaction::index', ['as' => 'transactions']);
-    $routes->get('list', 'Transaction::list', ['as' => 'transactions.list']);
-    $routes->get('form', 'Transaction::form', ['as' => 'transaction.form']);      // create (optional ?parent_id=N)
-    $routes->get('form/(:num)', 'Transaction::form/$1', ['as' => 'transaction.edit']);      // edit
-    $routes->post('store', 'Transaction::store', ['as' => 'transaction.store']);
-    $routes->post('update/(:num)', 'Transaction::update/$1', ['as' => 'transaction.update']);
-    $routes->post('destroy/(:num)', 'Transaction::destroy/$1', ['as' => 'transaction.destroy']);});
+
+$routes->get(  '/',               'Transaction::index',    ['as' => 'transactions']);
+$routes->get(  'list',          'Transaction::list',     ['as' => 'transactions.list']);
+$routes->get(  'form',           'Transaction::form',     ['as' => 'transaction.form']);
+$routes->post( 'store',          'Transaction::store',    ['as' => 'transaction.store']);
+$routes->post( 'destroy/(:num)', 'Transaction::destroy/$1', ['as' => 'transaction.destroy']);});
+
 
 service('auth')->routes($routes);

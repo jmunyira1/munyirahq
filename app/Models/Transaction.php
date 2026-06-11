@@ -58,10 +58,10 @@ class Transaction extends Model
             ->select([
                 't.*',
                 'a.account_name',
-                'a.currency',
+                'a.color',
                 'c.name         AS category_name',
                 'pc.name        AS parent_category_name',
-                'd.debt_name',
+                'd.party_id',
                 'ta.account_name AS transfer_to_account_name',
             ])
             ->join('accounts a',    'a.id  = t.account_id',              'left')

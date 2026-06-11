@@ -55,29 +55,32 @@ class Account extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+    public function credit(int $accountId, float $amount): void
+    {
+        $this->_guardAmount($amount);
+
+        if (!$this->find($accountId)) {
+            throw new \RuntimeException("Account #{$accountId} not found.");
+        }
+
+        $this->db->table('accounts')
+            ->where('id', $accountId)
+            ->set('current_balance', "current_balance + {$amount}", false)
+            ->update();
+    }
+
     public function debit(int $accountId, float $amount): void
     {
         $this->_guardAmount($amount);
 
-        $affected = $this->db->table('accounts')
-            ->where('id', $accountId)
-            ->update(['current_balance' => "current_balance - {$amount}"]);
-
-        if ($this->db->affectedRows() === 0) {
+        if (!$this->find($accountId)) {
             throw new \RuntimeException("Account #{$accountId} not found.");
         }
-    }
-        public function credit(int $accountId, float $amount): void
-    {
-        $this->_guardAmount($amount);
 
         $this->db->table('accounts')
             ->where('id', $accountId)
-            ->update(['current_balance' => "current_balance + {$amount}"]);
-
-        if ($this->db->affectedRows() === 0) {
-            throw new \RuntimeException("Account #{$accountId} not found.");
-        }
+            ->set('current_balance', "current_balance - {$amount}", false)
+            ->update();
     }
     public static function types(): array
     {

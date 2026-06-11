@@ -7,15 +7,23 @@
 <?= $this->section('content') ?>
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-id
-        <button class="btn btn-sm btn-primary"
-                hx-get="<?= url_to('debt.form') ?>"
-                hx-target="#debt-modal-body"
-                hx-swap="innerHTML"
-                data-bs-toggle="modal"
-                data-bs-target="#debtModal">
-            <i class="bi bi-plus-lg me-1"></i> New debt
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-primary"
+                    hx-get="<?= url_to('debt.form') ?>"
+                    hx-target="#debt-modal-body"
+                    hx-swap="innerHTML"
+                    data-bs-toggle="modal"
+                    data-bs-target="#debtModal">
+                <i class="bi bi-plus-lg me-1"></i> New Debt
+            </button>
+        </div>
+
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="show-settled">
+            <label class="form-check-label small text-muted" for="show-settled">
+                Show paid debts
+            </label>
+        </div>
     </div>
 
     <div id="debts-list-container"
@@ -28,11 +36,11 @@ id
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content shadow">
                 <div class="modal-header border-bottom">
-                    <h5 class="modal-title fw-semibold" id="debt-modal-title">debt</h5>
+                    <h5 class="modal-title fw-semibold" id="debt-modal-title">Debt</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4" id="debt-modal-body">
-                    <div class="text-center py-5 text-muted HTML-placeholder">
+                    <div class="text-center py-5 text-muted">
                         <div class="spinner-border spinner-border-sm me-2"></div>
                         Loading…
                     </div>
@@ -40,46 +48,47 @@ id
             </div>
         </div>
     </div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const modalEl = document.getElementById('debtModal');
+            const modalEl   = document.getElementById('debtModal');
             const modalBody = document.getElementById('debt-modal-body');
-            const bootstrapModal = new bootstrap.Modal(modalEl);
+            const titleEl   = document.getElementById('debt-modal-title');
+            const container = document.getElementById('debts-list-container');
 
-            // Capture the pristine loading state to restore it whenever the modal is hidden
             const cleanPlaceholder = modalBody.innerHTML;
+            const cleanTitle       = titleEl.textContent;
 
             modalEl.addEventListener('hidden.bs.modal', function () {
-                // Reset the modal content to the spinner when closed
-                // This prevents old form data or titles from "flashing" next time it's opened
                 modalBody.innerHTML = cleanPlaceholder;
-                document.getElementById('debt-modal-title').textContent = 'debt';
+                titleEl.textContent = cleanTitle;
             });
 
-            // ── Close Modal upon Successful Form Submission ──────────────────────
-            // If your server controller redirects or sends an empty success response (Status 200),
-            // we close the modal and tell the main container to reload its list.
             document.addEventListener('debtFormSuccess', function () {
-                const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                if (modalInstance) modalInstance.hide();
+                bootstrap.Modal.getInstance(modalEl)?.hide();
                 htmx.trigger('body', 'refreshDebtList');
             });
+
+            // ── Settled toggle ────────────────────────────────────────────────────────
+            document.getElementById('show-settled').addEventListener('change', function () {
+                const url = '<?= url_to('debts.list') ?>' + (this.checked ? '?settled=1' : '');
+                container.setAttribute('hx-get', url);
+                htmx.process(container);
+                htmx.trigger(container, 'load');
+            });
         });
-        // Replace the debtFormSuccess dispatch logic — listen at the modal body level
-        const modalBody = document.getElementById('debt-modal-body');
-        modalBody.addEventListener('htmx:afterRequest', function (e) {
-            // CSRF refresh
+
+        document.getElementById('debt-modal-body').addEventListener('htmx:afterRequest', function (e) {
             const token = e.detail.xhr.getResponseHeader('X-CSRF-TOKEN');
             if (token) {
                 const meta = document.querySelector('meta[name="csrf-token"]');
                 if (meta) meta.setAttribute('content', token);
-                const hiddenCsrfInput = e.detail.elt.querySelector('input[type="hidden"][name*="csrf"]');
-                if (hiddenCsrfInput) hiddenCsrfInput.value = token;
+                const hidden = e.detail.elt.querySelector('input[type="hidden"][name*="csrf"]');
+                if (hidden) hidden.value = token;
             }
-
             if (e.detail.xhr.status === 200) {
                 document.dispatchEvent(new CustomEvent('debtFormSuccess'));
             }

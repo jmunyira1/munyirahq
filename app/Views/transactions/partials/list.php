@@ -65,7 +65,6 @@ function txAmountSign(string $type): string
 
 ?>
 
-    {{-- ── Monthly summary bar ── --}}
     <div class="row g-3 mb-3">
         <?php
         $summaryCards = [
@@ -92,10 +91,9 @@ function txAmountSign(string $type): string
         <?php endforeach; ?>
     </div>
 
-    {{-- ── Transaction table ── --}}
-    <div class="table-responsive bg-white shadow-sm rounded">
+    <div class="table-responsive shadow-sm rounded">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light text-uppercase fs-7 text-muted">
+            <thead class="text-uppercase fs-7">
             <tr>
                 <th class="ps-4">Date</th>
                 <th>Type</th>
@@ -165,7 +163,6 @@ function txAmountSign(string $type): string
         </table>
     </div>
 
-    {{-- ── Pagination ── --}}
 <?php
 $totalPages = (int) ceil($total / $perPage);
 if ($totalPages > 1):

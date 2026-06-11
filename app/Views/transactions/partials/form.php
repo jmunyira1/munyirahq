@@ -33,7 +33,6 @@
 
     <div class="row g-3">
 
-        {{-- Type selector — shown as tabs so switching is a single click --}}
         <div class="col-12">
             <div class="btn-group w-100" role="group">
                 <?php
@@ -56,16 +55,14 @@
             </div>
         </div>
 
-        {{-- Hidden type field — updated by tab clicks --}}
         <input type="hidden" name="transaction_type" id="f-type" value="<?= esc($type) ?>">
 
-        {{-- ── Income fields ── --}}
         <div class="tx-section col-12 row g-3" id="section-income"
              style="<?= $type !== 'income' ? 'display:none;' : '' ?>">
 
             <div class="col-md-6">
                 <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Account</label>
-                <select class="form-select form-select-sm" name="account_id" id="f-income-account">
+                <select class="form-select form-select-sm" name="i_account_id" id="f-income-account">
                     <option value="">— Select account —</option>
                     <?php foreach ($accounts as $acc): ?>
                         <option value="<?= $acc['id'] ?>"
@@ -80,13 +77,11 @@
                 <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Amount</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text">KES</span>
-                    <input type="number" class="form-control" name="amount"
-                           id="f-income-amount" min="0.01" step="0.01" placeholder="0.00">
+                    <input type="number" class="form-control" name="i_amount" id="f-income-amount" min="0.01" step="0.01" placeholder="0.00">
                 </div>
             </div>
         </div>
 
-        {{-- ── Expense fields ── --}}
         <div class="tx-section col-12 row g-3" id="section-expense"
              style="<?= $type !== 'expense' ? 'display:none;' : '' ?>">
 
@@ -110,7 +105,6 @@
                     <?php endforeach; ?>
                     <?php if ($currentParent !== null) echo '</optgroup>'; ?>
                 </select>
-                {{-- Account hint so the user knows which account will be debited --}}
                 <div class="form-text" id="expense-account-hint">
                     Select a category to see which account will be debited.
                 </div>
@@ -120,22 +114,19 @@
                 <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Amount</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text">KES</span>
-                    <input type="number" class="form-control" name="amount"
-                           id="f-expense-amount" min="0.01" step="0.01" placeholder="0.00">
+                    <input type="number" class="form-control" name="e_amount" id="f-expense-amount" min="0.01" step="0.01" placeholder="0.00">
                 </div>
             </div>
         </div>
 
-        {{-- ── Debt payment fields ── --}}
         <div class="tx-section col-12 row g-3" id="section-debt_payment"
              style="<?= $type !== 'debt_payment' ? 'display:none;' : '' ?>">
 
             <div class="col-md-6">
                 <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Debt</label>
                 <?php if (isset($preDebt)): ?>
-                    {{-- Focused form: debt is fixed, show read-only --}}
                     <div class="form-control form-control-sm bg-light text-muted">
-                        <?= esc($preDebt['debt_name']) ?>
+                        <?= esc($preDebt['party_name']) ?>
                         — KES <?= number_format((float)$preDebt['current_balance'], 2) ?> remaining
                     </div>
                     <input type="hidden" name="debt_id" value="<?= $preDebt['id'] ?>">
@@ -146,7 +137,7 @@
                             <option value="<?= $debt['id'] ?>"
                                     data-balance="<?= $debt['current_balance'] ?>"
                                     <?= (isset($preDebtId) && (int)$preDebtId === (int)$debt['id']) ? 'selected' : '' ?>>
-                                <?= esc($debt['debt_name']) ?>
+                                <?= esc($debt['party_name']) ?>
                                 (KES <?= number_format((float)$debt['current_balance'], 2) ?> remaining)
                             </option>
                         <?php endforeach; ?>
@@ -156,12 +147,12 @@
 
             <div class="col-md-6">
                 <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Pay From Account</label>
-                <select class="form-select form-select-sm" name="account_id" id="f-debt-account">
+                <select class="form-select form-select-sm" name="d_account_id" id="f-debt-account">
                     <option value="">— Select account —</option>
                     <?php foreach ($accounts as $acc): ?>
                         <option value="<?= $acc['id'] ?>">
                             <?= esc($acc['account_name']) ?>
-                            (<?= esc($acc['currency']) ?> <?= number_format((float)$acc['current_balance'], 2) ?>)
+                           <?= number_format((float)$acc['current_balance'], 2) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -171,19 +162,17 @@
                 <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Amount</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text">KES</span>
-                    <input type="number" class="form-control" name="amount"
-                           id="f-debt-amount" min="0.01" step="0.01" placeholder="0.00">
+                    <input type="number" class="form-control" name="d_amount" id="f-debt-amount" min="0.01" step="0.01" placeholder="0.00">
                 </div>
             </div>
         </div>
 
-        {{-- ── Transfer fields ── --}}
         <div class="tx-section col-12 row g-3" id="section-transfer"
              style="<?= $type !== 'transfer' ? 'display:none;' : '' ?>">
 
             <div class="col-md-6">
                 <label class="form-label small fw-semibold text-muted text-uppercase mb-1">From Account</label>
-                <select class="form-select form-select-sm" name="account_id" id="f-transfer-from">
+                <select class="form-select form-select-sm" name="t_account_id" id="f-transfer-from">
                     <option value="">— Select account —</option>
                     <?php foreach ($accounts as $acc): ?>
                         <option value="<?= $acc['id'] ?>"
@@ -212,13 +201,11 @@
                 <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Amount</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text">KES</span>
-                    <input type="number" class="form-control" name="amount"
-                           id="f-transfer-amount" min="0.01" step="0.01" placeholder="0.00">
+                    <input type="number" class="form-control" name="t_amount" id="f-transfer-amount" min="0.01" step="0.01" placeholder="0.00">
                 </div>
             </div>
         </div>
 
-        {{-- ── Shared fields (all types) ── --}}
         <div class="col-md-6">
             <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Date & Time</label>
             <input type="datetime-local"
@@ -235,7 +222,6 @@
                    name="description" placeholder="e.g. Groceries at Naivas" maxlength="255">
         </div>
 
-        {{-- Error --}}
         <div class="col-12" id="form-error" style="display:none;">
             <div class="alert alert-danger py-2 small mb-0">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -243,7 +229,6 @@
             </div>
         </div>
 
-        {{-- Footer --}}
         <div class="col-12 d-flex justify-content-end align-items-center gap-2 pt-2 border-top">
             <button type="button" class="btn btn-sm btn-light border"
                     data-bs-dismiss="modal">Cancel</button>

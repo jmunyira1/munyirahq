@@ -3,73 +3,133 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
-use App\Models\Debt as DebtModel;
+use App\Models\Debt  as DebtModel;
 use App\Models\Party as PartyModel;
 
 class Debt extends BaseController
 {
+    // ── Pages ─────────────────────────────────────────────────────────────────
+
     public function index()
     {
         return view('debts/index');
     }
 
+    // ── HTMX partials ─────────────────────────────────────────────────────────
+
     public function list()
     {
-        $debts = (new DebtModel)->findAllWithParty();
-        return view('debts/partials/list', ['debts' => $debts]);
+        $includeSettled = (bool) $this->request->getGet('settled');
+        $debts = (new DebtModel)->findAllWithParty($includeSettled);
+
+        return view('debts/partials/list', [
+            'debts'          => $debts,
+            'includeSettled' => $includeSettled,
+        ]);
     }
 
-    public function form($id = null)
+    public function form(?int $id = null)
     {
-        $data = [];
-        $debtModel = new DebtModel();
-        $partyModel = new PartyModel();
+        $data = [
+            'parties' => (new PartyModel)->findAll(),
+            'types'   => DebtModel::types(),
+        ];
 
         if ($id !== null) {
-            $debt = $debtModel->find($id);
+            $debt = (new DebtModel)->find($id);
             if (!$debt) {
-                return $this->response->setStatusCode(404)->setBody('debt not found');
+                return $this->response->setStatusCode(404)->setBody('Debt not found.');
             }
-            $party = $partyModel->find($debt['party_id']);
             $data['debt'] = $debt;
-            $data['party'] = $party;
         }
-        $parties = $partyModel->findAll();
-
-        $data['parties'] = $parties;
 
         return view('debts/partials/form', $data);
     }
 
+    // ── CUD ───────────────────────────────────────────────────────────────────
+
     public function store()
     {
-        $debtModel = new DebtModel();
+        $model  = new DebtModel();
+        $amount = (float) $this->request->getPost('total_principal');
+
         $data = [
-            'amount'     => $this->request->getPost('amount'),
-            'party_id'      => $this->request->getPost('party'),
+            'party_id'        => $this->request->getPost('party_id'),
+            'debt_type'       => $this->request->getPost('debt_type'),
+            'total_principal' => $amount,
+            'current_balance' => $amount, // balance starts equal to the full principal
+            'status'          => 0,
+            'due_date'        => $this->request->getPost('due_date') ?: null,
         ];
-        $debtModel->save($data);
-        return $this->_successResponse('refreshDebtList','debt created successfully.');
+
+        if (!$model->validate($data)) {
+            return $this->response
+                ->setStatusCode(422)
+                ->setJSON(['error' => implode(' ', $model->errors())]);
+        }
+
+        $model->insert($data);
+
+        return $this->_successResponse('refreshDebtList', 'Debt recorded.');
     }
 
     public function update(int $id)
     {
-        $debtModel = new DebtModel();
-        $debt = $debtModel->find($id);
+        $model = new DebtModel();
+        $debt  = $model->find($id);
 
         if (!$debt) {
-            return $this->response->setStatusCode(404)->setBody('debt not found.');
+            return $this->response->setStatusCode(404)->setBody('Debt not found.');
         }
 
+        $newPrincipal = (float) $this->request->getPost('total_principal');
+
+        // Recalculate balance: new principal minus what has already been paid
+        $alreadyPaid = (float) $debt['total_principal'] - (float) $debt['current_balance'];
+        $newBalance  = max(0, $newPrincipal - $alreadyPaid);
+
         $data = [
-            'amount'     => $this->request->getPost('amount'),
-            'party_id'      => $this->request->getPost('party'),
+            'party_id'        => $this->request->getPost('party_id'),
+            'debt_type'       => $this->request->getPost('debt_type'),
+            'total_principal' => $newPrincipal,
+            'current_balance' => $newBalance,
+            'status'          => $newBalance <= 0 ? 1 : 0,
+            'due_date'        => $this->request->getPost('due_date') ?: null,
         ];
 
-        $debtModel->update($id, $data);
+        if (!$model->validate($data)) {
+            return $this->response
+                ->setStatusCode(422)
+                ->setJSON(['error' => implode(' ', $model->errors())]);
+        }
 
+        $model->update($id, $data);
 
-        return $this->_successResponse('refreshDebtList','debt updated successfully.');
+        return $this->_successResponse('refreshDebtList', 'Debt updated.');
+    }
+
+    public function destroy(int $id)
+    {
+        $model = new DebtModel();
+        $debt  = $model->find($id);
+
+        if (!$debt) {
+            return $this->response->setStatusCode(404)->setBody('Debt not found.');
+        }
+
+        // Block deletion if payments have been made against this debt
+        $txCount = $this->db->table('transactions')
+            ->where('debt_id', $id)
+            ->countAllResults();
+
+        if ($txCount > 0) {
+            return $this->response
+                ->setStatusCode(422)
+                ->setJSON(['error' => "Cannot delete: {$txCount} payment transaction(s) are linked to this debt."]);
+        }
+
+        $model->delete($id);
+
+        return $this->_successResponse('refreshDebtList', 'Debt deleted.');
     }
 }

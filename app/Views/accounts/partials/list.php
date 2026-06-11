@@ -4,9 +4,9 @@ use App\Models\Account as AccountModel;
 
 ?>
 
-<div class="table-responsive bg-white shadow-sm rounded">
+<div class="table-responsive shadow-sm rounded">
     <table class="table table-hover align-middle mb-0">
-        <thead class="table-light text-uppercase fs-7 text-muted">
+        <thead class="text-uppercase fs-7">
         <tr>
             <th class="ps-4">Account</th>
             <th class="text-end">Balance</th>
@@ -75,9 +75,9 @@ use App\Models\Account as AccountModel;
         </tbody>
 
         <?php if (!empty($accounts)): ?>
-            <tfoot class="table-light border-top">
+            <tfoot class="border-top">
             <tr>
-                <td colspan="2" class="ps-4 text-muted small fw-semibold text-uppercase">
+                <td  class="ps-4 text-muted small fw-semibold text-uppercase">
                     Total across all accounts
                 </td>
                 <td class="text-end fw-bold">

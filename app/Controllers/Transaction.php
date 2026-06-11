@@ -3,16 +3,24 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\Transaction as TransactionModel;
-use App\Models\Account as AccountModel;
-use App\Models\Category as CategoryModel;
-use App\Models\Debt as DebtModel;
-
+use App\Models\Account     as AccountModel;
+use App\Models\Category    as CategoryModel;
+use App\Models\Debt        as DebtModel;
 
 class Transaction extends BaseController
 {
-    public function index()
+    // ── Pages ─────────────────────────────────────────────────────────────────
+    protected $db;
+
+    public function initController(\CodeIgniter\HTTP\RequestInterface $request, \CodeIgniter\HTTP\ResponseInterface $response, \Psr\Log\LoggerInterface $logger)
+    {
+        // Do not forget to call parent
+        parent::initController($request, $response, $logger);
+
+        // Initialize the database connection here
+        $this->db = \Config\Database::connect();
+    }    public function index()
     {
         return view('transactions/index');
     }
@@ -74,12 +82,12 @@ class Transaction extends BaseController
             'preAccountId'  => $accountId,
             'subcategories' => $categoryModel->findAllSubcategories(),
             'accounts'      => $accountModel->findAll(),
-            'debts'         => $debtModel->where('status', 0)->findAll(), // active debts only
+            'debts'         => $debtModel->findAllWithParty(false), // active debts with party_name
         ];
 
         // Pre-load specific records for focused forms
         if ($debtId) {
-            $data['preDebt'] = $debtModel->find($debtId);
+            $data['preDebt'] = $debtModel->findOneWithParty((int) $debtId);
         }
         if ($accountId) {
             $data['preAccount'] = $accountModel->find($accountId);
@@ -142,7 +150,7 @@ class Transaction extends BaseController
             match($transaction['transaction_type']) {
 
                 // Income added money to account — take it back
-                'income' => $accountModel->deduct(
+                'income' => $accountModel->debit(
                     (int) $transaction['account_id'],
                     (float) $transaction['amount']
                 ),
@@ -175,14 +183,14 @@ class Transaction extends BaseController
 
     private function _storeIncome(): mixed
     {
-        $accountId = (int) $this->request->getPost('account_id');
-        $amount    = (float) $this->request->getPost('amount');
+        $accountId =  $this->request->getPost('i_account_id');
+        $amount    = (float) $this->request->getPost('i_amount');
         $date      = $this->request->getPost('transaction_date') ?: date('Y-m-d H:i:s');
 
         if (!$accountId || $amount <= 0) {
             return $this->response
                 ->setStatusCode(422)
-                ->setJSON(['error' => 'Account and a positive amount are required.']);
+                ->setJSON(['error' => 'Account and a positive amount are required. '.$accountId]);
         }
 
         $accountModel = new AccountModel();
@@ -211,7 +219,7 @@ class Transaction extends BaseController
     private function _storeExpense(): mixed
     {
         $categoryId = (int) $this->request->getPost('category_id');
-        $amount     = (float) $this->request->getPost('amount');
+        $amount     = (float) $this->request->getPost('e_amount');
         $date       = $this->request->getPost('transaction_date') ?: date('Y-m-d H:i:s');
 
         if (!$categoryId || $amount <= 0) {
@@ -243,7 +251,7 @@ class Transaction extends BaseController
         ]);
 
         // Expense reduces the account balance
-        $accountModel->deduct($accountId, $amount);
+        $accountModel->debit($accountId, $amount);
 
         $this->db->transComplete();
 
@@ -252,9 +260,9 @@ class Transaction extends BaseController
 
     private function _storeTransfer(): mixed
     {
-        $fromId = (int) $this->request->getPost('account_id');
+        $fromId = (int) $this->request->getPost('t_account_id');
         $toId   = (int) $this->request->getPost('transfer_to_account_id');
-        $amount = (float) $this->request->getPost('amount');
+        $amount = (float) $this->request->getPost('t_amount');
         $date   = $this->request->getPost('transaction_date') ?: date('Y-m-d H:i:s');
 
         if (!$fromId || !$toId || $amount <= 0) {
@@ -283,7 +291,7 @@ class Transaction extends BaseController
         ]);
 
         // Deduct from source, credit destination
-        $accountModel->deduct($fromId, $amount);
+        $accountModel->debit($fromId, $amount);
         $accountModel->credit($toId,   $amount);
 
         $this->db->transComplete();
@@ -293,9 +301,9 @@ class Transaction extends BaseController
 
     private function _storeDebtPayment(): mixed
     {
-        $accountId = (int) $this->request->getPost('account_id');
+        $accountId = (int) $this->request->getPost('d_account_id');
         $debtId    = (int) $this->request->getPost('debt_id');
-        $amount    = (float) $this->request->getPost('amount');
+        $amount    = (float) $this->request->getPost('d_amount');
         $date      = $this->request->getPost('transaction_date') ?: date('Y-m-d H:i:s');
 
         if (!$accountId || !$debtId || $amount <= 0) {
@@ -333,7 +341,7 @@ class Transaction extends BaseController
         ]);
 
         // Deduct payment from account
-        $accountModel->deduct($accountId, $effective);
+        $accountModel->debit($accountId, $effective);
 
         // Reduce debt balance, flip status to paid if cleared
         $debtModel->update($debtId, [
@@ -370,5 +378,4 @@ class Transaction extends BaseController
             ]);
         }
     }
-
 }

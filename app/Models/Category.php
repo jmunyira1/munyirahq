@@ -103,7 +103,7 @@ class Category extends Model
     public function findSubcategoryWithAccount(int $id): ?array
     {
         $row = $this->db->table('categories c')
-            ->select('c.*, a.account_name, a.current_balance, a.currency')
+            ->select('c.*, a.account_name, a.current_balance, a.color')
             ->join('accounts a', 'a.id = c.account_id', 'left')
             ->where('c.id', $id)
             ->where('c.parent_category_id IS NOT NULL')

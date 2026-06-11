@@ -64,6 +64,9 @@ class Transaction extends Migration
             'created_at' => [
                 'type'    => 'DATETIME',
             ],
+            'updated_at' => [
+                'type'    => 'DATETIME',
+            ]
         ]);
 
         $this->forge->addPrimaryKey('id');

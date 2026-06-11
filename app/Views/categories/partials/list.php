@@ -59,7 +59,7 @@
                 <?php if (!empty($parent['children'])): ?>
                     <div class="card-body p-0">
                         <table class="table table-hover align-middle mb-0 small">
-                            <thead class="table-light text-uppercase text-muted" style="font-size:0.7rem;">
+                            <thead class="text-uppercase text-muted" style="font-size:0.7rem;">
                             <tr>
                                 <th class="ps-5">Subcategory</th>
                                 <th>Account</th>
@@ -112,7 +112,7 @@
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
-                            <tfoot class="table-light border-top">
+                            <tfoot class="border-top">
                             <tr>
                                 <td colspan="2" class="ps-5 text-muted" style="font-size:0.7rem;">
                                     TOTAL ALLOCATED OF PARENT POOL

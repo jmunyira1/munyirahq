@@ -33,6 +33,12 @@ class Account extends Migration
                 'type'       => 'DECIMAL',
                 'constraint' => '15,2',
                 'default'    => 0.00,
+            ],
+            'created_at' => [
+                'type'    => 'DATETIME',
+            ],
+            'updated_at' => [
+                'type'    => 'DATETIME',
             ]
         ]);
 
