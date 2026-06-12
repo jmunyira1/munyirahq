@@ -83,4 +83,38 @@ $routes->post( 'store',          'Transaction::store',    ['as' => 'transaction.
 $routes->post( 'destroy/(:num)', 'Transaction::destroy/$1', ['as' => 'transaction.destroy']);});
 
 
+// ── Projects ──────────────────────────────────────────────────────────────────
+
+$routes->get('projects', 'Project::index', ['as' => 'projects']);
+$routes->get('projects/list', 'Project::list', ['as' => 'projects.list']);
+$routes->get('project/(:num)', 'Project::show/$1', ['as' => 'project.show']);
+$routes->get('project/form', 'Project::form', ['as' => 'project.form']);
+$routes->get('project/form/(:num)', 'Project::form/$1', ['as' => 'project.form.edit']);
+$routes->post('project/store', 'Project::store', ['as' => 'project.store']);
+$routes->post('project/update/(:num)', 'Project::update/$1', ['as' => 'project.update']);
+$routes->post('project/destroy/(:num)', 'Project::destroy/$1', ['as' => 'project.destroy']);
+
+// Completion
+$routes->get('project/complete/form/(:num)', 'Project::completeForm/$1', ['as' => 'project.complete.form']);
+$routes->post('project/complete/(:num)', 'Project::complete/$1', ['as' => 'project.complete']);
+
+// Sub-resources
+$routes->get('project/(:num)/costs', 'Project::costsPartial/$1', ['as' => 'project.costs_partial']);
+$routes->post('project/(:num)/cost/store', 'Project::storeCost/$1', ['as' => 'project.store_cost']);
+$routes->post('project/cost/destroy/(:num)', 'Project::destroyCost/$1', ['as' => 'project.destroy_cost']);
+
+$routes->get('project/(:num)/delivery-items', 'Project::deliveryItemsPartial/$1', ['as' => 'project.delivery_items_partial']);
+$routes->post('project/(:num)/delivery-item/store', 'Project::storeDeliveryItem/$1', ['as' => 'project.store_delivery_item']);
+$routes->post('project/delivery-item/destroy/(:num)', 'Project::destroyDeliveryItem/$1', ['as' => 'project.destroy_delivery_item']);
+
+$routes->get('project/(:num)/payments', 'Project::paymentsPartial/$1', ['as' => 'project.payments_partial']);
+$routes->post('project/(:num)/payment/store', 'Project::storePayment/$1', ['as' => 'project.store_payment']);
+$routes->post('project/payment/destroy/(:num)', 'Project::destroyPayment/$1', ['as' => 'project.destroy_payment']);
+
+// Documents (PDF download)
+$routes->get('project/(:num)/invoice', 'Project::invoice/$1', ['as' => 'project.invoice']);
+$routes->get('project/(:num)/delivery-note', 'Project::deliveryNote/$1', ['as' => 'project.delivery_note']);
+
+
+
 service('auth')->routes($routes);
