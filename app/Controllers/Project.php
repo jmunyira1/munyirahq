@@ -20,7 +20,7 @@ class Project extends BaseController
     {
         $project = (new ProjectModel)->findWithDetails($id);
         if (!$project) {
-            return redirect()->to(url_to('projects.index'))->with('error', 'Project not found.');
+            return redirect()->to(url_to('projects'))->with('error', 'Project not found.');
         }
         return view('projects/show', ['project' => $project]);
     }
@@ -190,20 +190,20 @@ class Project extends BaseController
                 ->setJSON(['error' => 'Title, amount and date are required.']);
         }
 
-        $this->db->table('project_costs')->insert($data);
+        $this->db->table('projectcosts')->insert($data);
 
         return $this->_successResponse('refreshProjectCosts_' . $projectId, 'Cost added.');
     }
 
     public function destroyCost(int $costId)
     {
-        $cost = $this->db->table('project_costs')->where('id', $costId)->get()->getRowArray();
+        $cost = $this->db->table('projectcosts')->where('id', $costId)->get()->getRowArray();
 
         if (!$cost) {
             return $this->response->setStatusCode(404)->setBody('Cost not found.');
         }
 
-        $this->db->table('project_costs')->where('id', $costId)->delete();
+        $this->db->table('projectcosts')->where('id', $costId)->delete();
 
         return $this->_successResponse('refreshProjectCosts_' . $cost['project_id'], 'Cost deleted.');
     }
@@ -224,20 +224,20 @@ class Project extends BaseController
                 ->setJSON(['error' => 'Name, quantity and unit price are required.']);
         }
 
-        $this->db->table('project_delivery_items')->insert($data);
+        $this->db->table('projectdeliveryitems')->insert($data);
 
         return $this->_successResponse('refreshDeliveryItems_' . $projectId, 'Item added.');
     }
 
     public function destroyDeliveryItem(int $itemId)
     {
-        $item = $this->db->table('project_delivery_items')->where('id', $itemId)->get()->getRowArray();
+        $item = $this->db->table('projectdeliveryitems')->where('id', $itemId)->get()->getRowArray();
 
         if (!$item) {
             return $this->response->setStatusCode(404)->setBody('Item not found.');
         }
 
-        $this->db->table('project_delivery_items')->where('id', $itemId)->delete();
+        $this->db->table('projectdeliveryitems')->where('id', $itemId)->delete();
 
         return $this->_successResponse('refreshDeliveryItems_' . $item['project_id'], 'Item deleted.');
     }
@@ -271,20 +271,20 @@ class Project extends BaseController
                 ->setJSON(['error' => 'Payment amount must be greater than zero.']);
         }
 
-        $this->db->table('project_payments')->insert($data);
+        $this->db->table('projectpayments')->insert($data);
 
         return $this->_successResponse('refreshProjectPayments_' . $projectId, 'Payment recorded.');
     }
 
     public function destroyPayment(int $paymentId)
     {
-        $payment = $this->db->table('project_payments')->where('id', $paymentId)->get()->getRowArray();
+        $payment = $this->db->table('projectpayments')->where('id', $paymentId)->get()->getRowArray();
 
         if (!$payment) {
             return $this->response->setStatusCode(404)->setBody('Payment not found.');
         }
 
-        $this->db->table('project_payments')->where('id', $paymentId)->delete();
+        $this->db->table('projectpayments')->where('id', $paymentId)->delete();
 
         return $this->_successResponse(
             'refreshProjectPayments_' . $payment['project_id'],

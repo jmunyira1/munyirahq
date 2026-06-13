@@ -91,7 +91,7 @@ $totalAvail = $income - $totalSpent;
     <div class="text-center text-muted py-5">
         <i class="bi bi-tags fs-2 d-block mb-2 opacity-25"></i>
         No categories set up yet.
-        <a href="<?= url_to('categories.index') ?>">Add categories</a> to see budget breakdown.
+        <a href="<?= url_to('categories') ?>">Add categories</a> to see budget breakdown.
     </div>
 <?php else: ?>
 

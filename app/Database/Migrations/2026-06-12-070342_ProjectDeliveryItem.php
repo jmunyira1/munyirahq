@@ -31,7 +31,7 @@ class ProjectDeliveryItem extends Migration
         $this->forge->createTable('projectdeliveryitems');
 
         // Replace total_price with a generated column
-        $this->db->query('ALTER TABLE project_delivery_items 
+        $this->db->query('ALTER TABLE projectdeliveryitems 
             MODIFY total_price DECIMAL(15,2) GENERATED ALWAYS AS (unit_price * quantity) STORED');
 
     }

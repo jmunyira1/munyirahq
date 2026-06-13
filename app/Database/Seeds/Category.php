@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Database\Migrations\Seeds;
+namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
 
-class PartyContact extends Seeder
+class Category extends Seeder
 {
     public function run()
     {

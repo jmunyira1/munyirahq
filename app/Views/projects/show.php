@@ -14,10 +14,9 @@ $fullyPaid  = $totalPaid >= $contracted;
 $isActive   = $project['status'] === 'active';
 ?>
 
-    {{-- ── Header ── --}}
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
         <div>
-            <a href="<?= url_to('projects.index') ?>" class="text-muted small">
+            <a href="<?= url_to('projects') ?>" class="text-muted small">
                 <i class="bi bi-arrow-left me-1"></i> Projects
             </a>
             <h4 class="fw-bold mt-1 mb-0"><?= esc($project['title']) ?></h4>
@@ -32,7 +31,6 @@ $isActive   = $project['status'] === 'active';
         <span class="badge fs-6 fw-normal <?= $isActive ? 'text-bg-primary' : 'text-bg-success' ?>">
             <?= ucfirst($project['status']) ?>
         </span>
-            {{-- PDF buttons --}}
             <?php if (!empty($project['delivery_items'])): ?>
                 <a href="<?= url_to('project.invoice', $project['id']) ?>"
                    class="btn btn-sm btn-outline-secondary" target="_blank">
@@ -46,7 +44,6 @@ $isActive   = $project['status'] === 'active';
         </div>
     </div>
 
-    {{-- ── Financial summary ── --}}
     <div class="row g-3 mb-4">
         <?php foreach ([
                            ['Contracted',  number_format($contracted, 2), 'text-dark',    'cash-stack'],
@@ -70,10 +67,8 @@ $isActive   = $project['status'] === 'active';
 
     <div class="row g-4">
 
-        {{-- ── Left column: Costs + Delivery Items ── --}}
         <div class="col-md-7">
 
-            {{-- Costs --}}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <span class="fw-semibold small">Project Costs</span>
@@ -127,7 +122,6 @@ $isActive   = $project['status'] === 'active';
                 </div>
             </div>
 
-            {{-- Delivery Items --}}
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <span class="fw-semibold small">Delivery Items</span>
@@ -179,7 +173,6 @@ $isActive   = $project['status'] === 'active';
 
         </div>
 
-        {{-- ── Right column: Payments ── --}}
         <div class="col-md-5">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -237,7 +230,6 @@ $isActive   = $project['status'] === 'active';
 
     </div>
 
-    {{-- Budget item modal (reused for any modal needs on this page) --}}
     <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-md modal-dialog-centered">
             <div class="modal-content shadow">

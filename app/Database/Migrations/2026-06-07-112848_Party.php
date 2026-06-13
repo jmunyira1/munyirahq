@@ -36,6 +36,12 @@ class Party extends Migration
                 'null' => true,
                 'default' => null,
             ],
+            'address' => [
+                'type' => 'VARCHAR',
+                'constraint' => 200,
+                'null' => true,
+                'default' => null,
+            ],
             'created_at' => [
                 'type' => 'DATETIME',
                 'null' => true,

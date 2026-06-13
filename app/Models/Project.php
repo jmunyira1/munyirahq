@@ -61,8 +61,8 @@ class Project extends Model
                 'COALESCE(SUM(DISTINCT pp.amount), 0) - COALESCE(SUM(DISTINCT pc.amount), 0) AS profit',
             ])
             ->join('parties pa',          'pa.id = p.party_id',   'left')
-            ->join('project_payments pp', 'pp.project_id = p.id', 'left')
-            ->join('project_costs pc',    'pc.project_id = p.id', 'left')
+            ->join('projectpayments pp', 'pp.project_id = p.id', 'left')
+            ->join('projectcosts pc',    'pc.project_id = p.id', 'left')
             ->groupBy('p.id')
             ->orderBy('p.created_at', 'DESC');
 
@@ -81,16 +81,25 @@ class Project extends Model
         $project = $this->db->table('projects p')
             ->select([
                 'p.*',
-                'pa.name AS party_name', 'pa.phone', 'pa.email', 'pa.address',
-                'pa.is_person', 'pa.gender', 'pa.title AS party_title',
+                'pa.name AS party_name',
+                'pa.is_person',
+                'pa.gender',
+                'pa.title AS party_title',
+                'pa.address', // Kept from your original query, assuming it exists on the parties table
+
+                // Dynamically pull phone and email from the contact table
+                "MAX(CASE WHEN pc_contact.contact_type = 'phone' THEN pc_contact.contact_value END) AS phone",
+                "MAX(CASE WHEN pc_contact.contact_type = 'email' THEN pc_contact.contact_value END) AS email",
+
                 'COALESCE(SUM(DISTINCT pp.amount), 0) AS total_paid',
                 'COALESCE(SUM(DISTINCT pc.amount), 0) AS total_costs',
                 'p.contracted_amount - COALESCE(SUM(DISTINCT pp.amount), 0) AS balance_due',
                 'COALESCE(SUM(DISTINCT pp.amount), 0) - COALESCE(SUM(DISTINCT pc.amount), 0) AS profit',
             ])
-            ->join('parties pa',          'pa.id = p.party_id',   'left')
-            ->join('project_payments pp', 'pp.project_id = p.id', 'left')
-            ->join('project_costs pc',    'pc.project_id = p.id', 'left')
+            ->join('parties pa',          'pa.id = p.party_id',       'left')
+            ->join('partycontacts pc_contact', 'pc_contact.party_id = pa.id', 'left') // New join added here
+            ->join('projectpayments pp', 'pp.project_id = p.id',     'left')
+            ->join('projectcosts pc',    'pc.project_id = p.id',     'left')
             ->where('p.id', $id)
             ->groupBy('p.id')
             ->get()
@@ -98,13 +107,13 @@ class Project extends Model
 
         if (!$project) return null;
 
-        $project['costs']          = $this->db->table('project_costs')
+        $project['costs']          = $this->db->table('projectcosts')
             ->where('project_id', $id)->orderBy('incurred_on', 'DESC')->get()->getResultArray();
 
-        $project['delivery_items'] = $this->db->table('project_delivery_items')
+        $project['delivery_items'] = $this->db->table('projectdeliveryitems')
             ->where('project_id', $id)->get()->getResultArray();
 
-        $project['payments']       = $this->db->table('project_payments')
+        $project['payments']       = $this->db->table('projectpayments')
             ->where('project_id', $id)->orderBy('payment_date', 'DESC')->get()->getResultArray();
 
         return $project;
