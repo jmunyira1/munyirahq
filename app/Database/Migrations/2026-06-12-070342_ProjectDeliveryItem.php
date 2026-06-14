@@ -19,10 +19,7 @@ class ProjectDeliveryItem extends Migration
             // total_price is a generated column — computed by the DB, never written by app
             'total_price' => [
                 'type'       => 'DECIMAL',
-                'constraint' => '15,2',
-                'null'       => false,
-                // CI4 forge doesn't support GENERATED natively — we use a raw query after createTable
-            ],
+                'constraint' => '15,2'],
             'created_at'  => ['type' => 'DATETIME', 'null' => true],
             'updated_at'  => ['type' => 'DATETIME', 'null' => true],
         ]);

@@ -9,6 +9,13 @@ use App\Models\Account as AccountModel;
 
 class Project extends BaseController
 {
+    protected $db;
+
+    public function __construct()
+    {
+        // Connect to the database and assign it to the property
+        $this->db = \Config\Database::connect();
+    }
     // ── Pages ─────────────────────────────────────────────────────────────────
 
     public function index()
@@ -20,7 +27,7 @@ class Project extends BaseController
     {
         $project = (new ProjectModel)->findWithDetails($id);
         if (!$project) {
-            return redirect()->to(url_to('projects'))->with('error', 'Project not found.');
+            return redirect()->to(url_to('projects.index'))->with('error', 'Project not found.');
         }
         return view('projects/show', ['project' => $project]);
     }
@@ -342,4 +349,65 @@ class Project extends BaseController
                 ->setBody('PDF generation failed: ' . $e->getMessage());
         }
     }
+    // ── Sub-resource partials (HTMX loaders) ─────────────────────────────────
+
+    public function costsPartial(int $projectId)
+    {
+        $project = (new ProjectModel)->find($projectId);
+        if (!$project) {
+            return $this->response->setStatusCode(404)->setBody('Project not found.');
+        }
+
+        $costs = $this->db->table('projectcosts')
+            ->where('project_id', $projectId)
+            ->orderBy('incurred_on', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        return view('projects/partials/costs', [
+            'costs'     => $costs,
+            'projectId' => $projectId,
+            'isActive'  => $project['status'] === 'active',
+        ]);
+    }
+
+    public function deliveryItemsPartial(int $projectId)
+    {
+        $project = (new ProjectModel)->find($projectId);
+        if (!$project) {
+            return $this->response->setStatusCode(404)->setBody('Project not found.');
+        }
+
+        $items = $this->db->table('projectdeliveryitems')
+            ->where('project_id', $projectId)
+            ->get()
+            ->getResultArray();
+
+        return view('projects/partials/delivery_items', [
+            'items'     => $items,
+            'projectId' => $projectId,
+            'isActive'  => $project['status'] === 'active',
+        ]);
+    }
+
+    public function paymentsPartial(int $projectId)
+    {
+        $project = (new ProjectModel)->find($projectId);
+        if (!$project) {
+            return $this->response->setStatusCode(404)->setBody('Project not found.');
+        }
+
+        $payments = $this->db->table('projectpayments')
+            ->where('project_id', $projectId)
+            ->orderBy('payment_date', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        return view('projects/partials/payments', [
+            'payments'  => $payments,
+            'projectId' => $projectId,
+            'isActive'  => $project['status'] === 'active',
+        ]);
+    }
+
 }
