@@ -282,24 +282,16 @@
                 <!--begin::User Menu Dropdown-->
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                        <img
-                            src="/assets/img/user2-160x160.jpg"
-                            class="user-image rounded-circle shadow"
-                            alt="User Image"
-                        />
-                        <span class="d-none d-md-inline">Alexander Pierce</span>
+                        <i class="bi bi-person-circle fs-5 me-1"></i>
+                        <span class="d-none d-md-inline"><?= auth()->user()->username ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                         <!--begin::User Image-->
                         <li class="user-header text-bg-primary">
-                            <img
-                                src="/assets/img/user2-160x160.jpg"
-                                class="rounded-circle shadow"
-                                alt="User Image"
-                            />
+                            <i class="bi bi-person-circle" style="font-size:4rem;"></i>
                             <p>
-                                Alexander Pierce - Web Developer
-                                <small>Member since Nov. 2023</small>
+                                <?= auth()->user()->username ?>
+                                <small><?= auth()->user()->email ?></small>
                             </p>
                         </li>
                         <!--end::User Image-->
@@ -308,7 +300,7 @@
                             <!--begin::Row-->
                             <div class="row">
                                 <div class="col-4 text-center">
-                                    <a href="#">Followers</a>
+                                    <a href="#">Owner</a>
                                 </div>
                                 <div class="col-4 text-center">
                                     <a href="#">Sales</a>
@@ -322,8 +314,12 @@
                         <!--end::Menu Body-->
                         <!--begin::Menu Footer-->
                         <li class="user-footer">
-                            <a href="#" class="btn btn-outline-secondary">Profile</a>
-                            <a href="#" class="btn btn-outline-danger float-end">Sign out</a>
+                            <a href="<?= base_url('profile') ?>" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-person me-1"></i> Profile
+                            </a>
+                            <a href="<?= url_to('logout') ?>" class="btn btn-outline-danger btn-sm float-end">
+                                <i class="bi bi-box-arrow-right me-1"></i> Sign out
+                            </a>
                         </li>
                         <!--end::Menu Footer-->
                     </ul>

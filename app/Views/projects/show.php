@@ -5,13 +5,8 @@
 <?= $this->section('content') ?>
 
 <?php
-$contracted = (float)$project['contracted_amount'];
-$totalPaid  = (float)$project['total_paid'];
-$totalCosts = (float)$project['total_costs'];
-$profit     = (float)$project['profit'];
-$balanceDue = (float)$project['balance_due'];
-$fullyPaid  = $totalPaid >= $contracted;
-$isActive   = $project['status'] === 'active';
+$isActive  = $project['status'] === 'active';
+$fullyPaid = (float)$project['total_paid'] >= (float)$project['contracted_amount'];
 ?>
 
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
@@ -27,7 +22,7 @@ $isActive   = $project['status'] === 'active';
                 <?php endif; ?>
             </div>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
         <span class="badge fs-6 fw-normal <?= $isActive ? 'text-bg-primary' : 'text-bg-success' ?>">
             <?= ucfirst($project['status']) ?>
         </span>
@@ -41,28 +36,37 @@ $isActive   = $project['status'] === 'active';
                     <i class="bi bi-file-earmark-text me-1"></i> Delivery Note
                 </a>
             <?php endif; ?>
+            <?php if ($isActive && $fullyPaid): ?>
+                <button class="btn btn-sm btn-success"
+                        hx-get="<?= url_to('project.complete.form', $project['id']) ?>"
+                        hx-target="#project-modal-body"
+                        hx-swap="innerHTML"
+                        data-bs-toggle="modal"
+                        data-bs-target="#projectModal">
+                    <i class="bi bi-check-circle me-1"></i> Complete Project
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <?php foreach ([
-                           ['Contracted',  number_format($contracted, 2), 'text-dark',    'cash-stack'],
-                           ['Paid',        number_format($totalPaid, 2),  $fullyPaid ? 'text-success' : 'text-warning', 'arrow-down-circle'],
-                           ['Balance Due', number_format($balanceDue, 2), $balanceDue > 0 ? 'text-danger' : 'text-success', 'hourglass-split'],
-                           ['Costs',       number_format($totalCosts, 2), 'text-danger',  'arrow-up-circle'],
-                           ['Profit',      number_format($profit, 2),     $profit >= 0 ? 'text-success' : 'text-danger', 'graph-up'],
-                       ] as [$label, $value, $cls, $icon]): ?>
-            <div class="col-6 col-md">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body py-3">
-                        <div class="small text-muted mb-1">
-                            <i class="bi bi-<?= $icon ?> me-1"></i><?= $label ?>
+    <div id="project-stats"
+         hx-get="<?= url_to('project.stats_partial', $project['id']) ?>"
+         hx-trigger="load, refreshProjectStats_<?= $project['id'] ?> from:body"
+         class="mb-4">
+        <div class="row g-3">
+            <?php for ($i = 0; $i < 5; $i++): ?>
+                <div class="col-6 col-md">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body py-3">
+                            <div class="placeholder-glow">
+                                <span class="placeholder col-6"></span>
+                                <span class="placeholder col-8 mt-1"></span>
+                            </div>
                         </div>
-                        <div class="fw-bold <?= $cls ?>">KES <?= $value ?></div>
                     </div>
                 </div>
-            </div>
-        <?php endforeach; ?>
+            <?php endfor; ?>
+        </div>
     </div>
 
     <div class="row g-4">
@@ -84,28 +88,37 @@ $isActive   = $project['status'] === 'active';
                     <div class="collapse" id="add-cost-form">
                         <div class="card-body border-bottom bg-light">
                             <form hx-post="<?= url_to('project.store_cost', $project['id']) ?>"
-                                  hx-target="#costs-list" hx-swap="innerHTML"
+                                  hx-target="this" hx-swap="none"
                                   hx-encoding="multipart/form-data">
                                 <?= csrf_field() ?>
-                                <div class="row g-2">
-                                    <div class="col-md-4">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-3">
+                                        <label class="form-label small mb-1">Title</label>
                                         <input type="text" class="form-control form-control-sm"
-                                               name="title" placeholder="Cost title" required>
+                                               name="title" placeholder="e.g. Materials" required>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-1">
+                                        <label class="form-label small mb-1">Qty</label>
                                         <input type="number" class="form-control form-control-sm"
-                                               name="amount" placeholder="Amount" step="0.01" min="0.01" required>
+                                               name="quantity" value="1" min="1" required>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
+                                        <label class="form-label small mb-1">Unit Price</label>
+                                        <input type="number" class="form-control form-control-sm"
+                                               name="unit_price" placeholder="0.00" step="0.01" min="0.01" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small mb-1">Date</label>
                                         <input type="date" class="form-control form-control-sm"
                                                name="incurred_on" value="<?= date('Y-m-d') ?>" required>
                                     </div>
                                     <div class="col-md-2">
-                                        <button type="submit" class="btn btn-sm btn-primary w-100">Add</button>
-                                    </div>
-                                    <div class="col-12">
+                                        <label class="form-label small mb-1">Notes</label>
                                         <input type="text" class="form-control form-control-sm"
-                                               name="notes" placeholder="Notes (optional)">
+                                               name="notes" placeholder="Optional">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-sm btn-primary w-100">Add</button>
                                     </div>
                                 </div>
                             </form>
@@ -137,21 +150,24 @@ $isActive   = $project['status'] === 'active';
                     <div class="collapse" id="add-item-form">
                         <div class="card-body border-bottom bg-light">
                             <form hx-post="<?= url_to('project.store_delivery_item', $project['id']) ?>"
-                                  hx-target="#delivery-items-list" hx-swap="innerHTML"
+                                  hx-target="this" hx-swap="none"
                                   hx-encoding="multipart/form-data">
                                 <?= csrf_field() ?>
-                                <div class="row g-2">
+                                <div class="row g-2 align-items-end">
                                     <div class="col-md-5">
+                                        <label class="form-label small mb-1">Item Name</label>
                                         <input type="text" class="form-control form-control-sm"
-                                               name="name" placeholder="Item name" required>
+                                               name="name" placeholder="e.g. Waterproofing membrane" required>
                                     </div>
                                     <div class="col-md-2">
+                                        <label class="form-label small mb-1">Qty</label>
                                         <input type="number" class="form-control form-control-sm"
-                                               name="quantity" placeholder="Qty" min="1" value="1" required>
+                                               name="quantity" value="1" min="1" required>
                                     </div>
                                     <div class="col-md-3">
+                                        <label class="form-label small mb-1">Unit Price</label>
                                         <input type="number" class="form-control form-control-sm"
-                                               name="unit_price" placeholder="Unit price" step="0.01" min="0.01" required>
+                                               name="unit_price" placeholder="0.00" step="0.01" min="0.01" required>
                                     </div>
                                     <div class="col-md-2">
                                         <button type="submit" class="btn btn-sm btn-primary w-100">Add</button>
@@ -189,28 +205,34 @@ $isActive   = $project['status'] === 'active';
                     <div class="collapse" id="add-payment-form">
                         <div class="card-body border-bottom bg-light">
                             <form hx-post="<?= url_to('project.store_payment', $project['id']) ?>"
-                                  hx-target="#payments-list" hx-swap="innerHTML"
+                                  hx-target="this" hx-swap="none"
                                   hx-encoding="multipart/form-data">
                                 <?= csrf_field() ?>
-                                <div class="row g-2">
+                                <div class="row g-2 align-items-end">
                                     <div class="col-6">
+                                        <label class="form-label small mb-1">Amount</label>
                                         <input type="number" class="form-control form-control-sm"
-                                               name="amount" placeholder="Amount" step="0.01" min="0.01" required>
+                                               name="amount" placeholder="0.00" step="0.01" min="0.01" required>
                                     </div>
                                     <div class="col-6">
+                                        <label class="form-label small mb-1">Date</label>
                                         <input type="datetime-local" class="form-control form-control-sm"
                                                name="payment_date" value="<?= date('Y-m-d\TH:i') ?>" required>
                                     </div>
                                     <div class="col-6">
+                                        <label class="form-label small mb-1">Method</label>
                                         <input type="text" class="form-control form-control-sm"
-                                               name="method" placeholder="Method (e.g. M-Pesa)">
+                                               name="method" placeholder="e.g. M-Pesa">
                                     </div>
                                     <div class="col-6">
+                                        <label class="form-label small mb-1">Reference</label>
                                         <input type="text" class="form-control form-control-sm"
-                                               name="reference" placeholder="Reference / code">
+                                               name="reference" placeholder="Transaction code">
                                     </div>
                                     <div class="col-12">
-                                        <button type="submit" class="btn btn-sm btn-primary w-100">Record Payment</button>
+                                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                                            Record Payment
+                                        </button>
                                     </div>
                                 </div>
                             </form>
@@ -250,6 +272,52 @@ $isActive   = $project['status'] === 'active';
 
 <?= $this->section('scripts') ?>
     <script>
+        // Toggle inline edit row visibility
+        function toggleEdit(editRowId, viewRowId) {
+            const editRow = document.getElementById(editRowId);
+            const viewRow = document.getElementById(viewRowId);
+            if (!editRow || !viewRow) return;
+            const isHidden = editRow.style.display === 'none';
+            editRow.style.display = isHidden ? '' : 'none';
+            viewRow.style.display = isHidden ? 'none' : '';
+        }
+
+        // ── Page-level HTMX event dispatcher ─────────────────────────────────────────
+        // Inline forms on this page are NOT inside a modal, so there is no
+        // htmx:afterRequest listener to dispatch events. We listen at the document
+        // level and fire each event named in the HX-Trigger response header onto
+        // document.body so the hx-trigger="eventName from:body" containers pick them up.
+        document.addEventListener('htmx:afterRequest', function (e) {
+            // Refresh CSRF token
+            const token = e.detail.xhr.getResponseHeader('X-CSRF-TOKEN');
+            if (token) {
+                const meta = document.querySelector('meta[name="csrf-token"]');
+                if (meta) meta.setAttribute('content', token);
+                const hidden = e.detail.elt.querySelector('input[type="hidden"][name*="csrf"]');
+                if (hidden) hidden.value = token;
+            }
+
+            // Read HX-Trigger header and dispatch each event onto body.
+            // Handles both plain string ("eventA eventB") and JSON ({"eventA":"","eventB":""})
+            const trigger = e.detail.xhr.getResponseHeader('HX-Trigger');
+            if (trigger && e.detail.xhr.status === 200) {
+                let eventNames = [];
+                try {
+                    // JSON format: {"refreshProjectCosts_1": "", "refreshProjectStats_1": ""}
+                    const parsed = JSON.parse(trigger);
+                    eventNames = Object.keys(parsed);
+                } catch (_) {
+                    // Plain string format: "refreshProjectCosts_1 refreshProjectStats_1"
+                    eventNames = trigger.trim().split(/\s+/);
+                }
+                eventNames.forEach(function (eventName) {
+                    if (eventName) {
+                        document.body.dispatchEvent(new CustomEvent(eventName, { bubbles: true }));
+                    }
+                });
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             const modalEl   = document.getElementById('projectModal');
             const modalBody = document.getElementById('project-modal-body');
@@ -261,10 +329,9 @@ $isActive   = $project['status'] === 'active';
                 titleEl.textContent = 'Project';
             });
 
+            // After successful completion, reload the page to reflect new status
             document.addEventListener('projectFormSuccess', function () {
                 bootstrap.Modal.getInstance(modalEl)?.hide();
-                htmx.trigger('body', 'refreshProjectList');
-                // Reload the page to reflect completion status change
                 setTimeout(() => location.reload(), 300);
             });
 

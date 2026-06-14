@@ -7,99 +7,103 @@
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 15px;
-            color: #333;
+            color: #000;
             margin: 0;
-            padding: 10px;
+            padding: 5px;
             background: #fff;
         }
         .invoice-box {
-            border: 1px solid #bbb;
-            padding: 25px 40px;
+            border: 1px solid #000;
+            padding: 15px 20px;
             border-radius: 6px;
         }
         .header, .meta, .client-info {
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .header td, .meta td {
             vertical-align: top;
         }
         .brand-name {
-            font-size: 30px;
+            font-size: 28px;
             font-weight: 600;
             letter-spacing: 1px;
             color: #000;
         }
         .header .right {
             text-align: right;
-            font-size: 26px;
+            font-size: 24px;
             text-transform: uppercase;
             font-weight: bold;
             color: #000;
         }
         hr {
             border: none;
-            border-top: 1px solid #aaa;
-            margin: 12px 0;
+            border-top: 1px solid #000;
+            margin: 6px 0;
         }
         .meta td {
-            font-size: 16px;
-            color: #444;
+            font-size: 15px;
+            color: #000;
         }
         .meta strong {
             font-weight: bold;
             color: #000;
-            font-size: 16px;
+            font-size: 15px;
         }
         .meta .right {
             text-align: right;
         }
         .client-info {
-            margin-top: 12px;
-            font-size: 16px;
+            margin-top: 6px;
+            font-size: 15px;
+            color: #000;
         }
         .client-info p {
-            margin: 0 0 5px;
-            line-height: 1.4;
+            margin: 0 0 3px;
+            line-height: 1.2;
         }
         .client-info strong {
             font-weight: bold;
-            font-size: 17px;
+            font-size: 16px;
+            color: #000;
         }
         .description-section {
-            margin: 12px 0;
-            font-size: 15px;
+            margin: 6px 0;
+            font-size: 14px;
             background: #f5f5f5;
-            padding: 12px 15px;
-            border-left: 4px solid #333;
+            padding: 8px 10px;
+            border-left: 4px solid #000;
             border-radius: 2px;
         }
         .description-label {
-            margin: 0 0 6px;
-            font-size: 16px;
+            margin: 0 0 3px;
+            font-size: 15px;
+            color: #000;
         }
         .description-text {
             margin: 0;
-            color: #2a2a2a;
-            line-height: 1.6;
+            color: #000;
+            line-height: 1.4;
         }
         table.items {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            margin-top: 12px;
-            font-size: 15px;
+            margin-top: 6px;
+            font-size: 14px;
             border-radius: 6px;
             overflow: hidden;
         }
         table.items th, table.items td {
-            padding: 10px;
-            border: 1px solid #ccc;
+            padding: 6px 8px;
+            border: 1px solid #000;
         }
         table.items th {
             background: #f0f0f0;
             font-weight: bold;
             text-align: left;
+            color: #000;
         }
         table.items .right {
             text-align: right;
@@ -108,52 +112,53 @@
             width: 50%;
             margin-left: auto;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 8px;
         }
         .totals-table td {
-            padding: 6px 10px;
+            padding: 4px 8px;
             border: none;
-            font-size: 15px;
+            font-size: 14px;
+            color: #000;
         }
         .totals-table .total-row td {
             font-weight: bold;
-            font-size: 16px;
-            border-top: 2px solid #333;
-            padding-top: 10px;
+            font-size: 15px;
+            border-top: 2px solid #000;
+            padding-top: 6px;
         }
         .badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 3px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
-        .badge-paid { background: #d1fae5; color: #065f46; }
-        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-paid { background: #d1fae5; color: #000; }
+        .badge-pending { background: #fef3c7; color: #000; }
         .contact-info {
-            font-size: 15px;
-            color: #333;
-            margin-top: 15px;
+            font-size: 14px;
+            color: #000;
+            margin-top: 8px;
         }
         .contact-info p {
-            margin: 0 0 5px;
-            line-height: 1.4;
+            margin: 0 0 3px;
+            line-height: 1.2;
         }
         .footer {
             text-align: center;
-            font-size: 13px;
-            color: #555;
-            line-height: 1.5;
-            margin-top: 15px;
-            padding-top: 8px;
-            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #000;
+            line-height: 1.3;
+            margin-top: 8px;
+            padding-top: 4px;
+            border-top: 1px solid #000;
         }
     </style>
 </head>
 <body>
 
 <?php
-$invoiceNo     = 'INV-' . date('Y') . '-' . str_pad($project['id'], 4, '0', STR_PAD_LEFT);
+$invoiceNo     = 'INV-' . date('y') . str_pad($project['id'], 2, '0', STR_PAD_LEFT);
 $contracted    = (float)$project['contracted_amount'];
 $totalPaid     = (float)$project['total_paid'];
 $balance       = $contracted - $totalPaid;
@@ -163,7 +168,7 @@ $deliveryTotal = array_sum(array_column($project['delivery_items'], 'total_price
 <div class="invoice-box">
     <table class="header">
         <tr>
-            <td class="brand-name">MunyiraHQ</td>
+            <td class="brand-name">Logia</td>
             <td class="right">Invoice</td>
         </tr>
     </table>
@@ -227,67 +232,31 @@ $deliveryTotal = array_sum(array_column($project['delivery_items'], 'total_price
 
     <table class="totals-table">
         <tr>
-            <td style="color:#666;">Subtotal</td>
+            <td>Subtotal</td>
             <td style="text-align:right;">KES <?= number_format($deliveryTotal, 2) ?></td>
         </tr>
         <tr>
-            <td style="color:#666;">Contracted Amount</td>
+            <td>Contracted Amount</td>
             <td style="text-align:right;">KES <?= number_format($contracted, 2) ?></td>
         </tr>
         <tr>
-            <td style="color:#666;">Amount Paid</td>
-            <td style="text-align:right; color:#059669;">KES <?= number_format($totalPaid, 2) ?></td>
+            <td>Amount Paid</td>
+            <td style="text-align:right;">KES <?= number_format($totalPaid, 2) ?></td>
         </tr>
         <tr class="total-row">
             <td>Balance Due</td>
-            <td style="text-align:right; color:<?= $balance > 0 ? '#dc2626' : '#059669' ?>;">
+            <td style="text-align:right;">
                 KES <?= number_format($balance, 2) ?>
             </td>
         </tr>
     </table>
-
-    <?php if (!empty($project['payments'])): ?>
-        <hr>
-        <div class="client-info">
-            <p><strong>Payment History:</strong></p>
-        </div>
-        <table class="items" style="margin-top: 5px;">
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Method</th>
-                <th>Reference</th>
-                <th class="right">Amount (KES)</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($project['payments'] as $pay): ?>
-                <tr>
-                    <td><?= date('d M Y', strtotime($pay['payment_date'])) ?></td>
-                    <td><?= esc($pay['method'] ?? '—') ?></td>
-                    <td><?= esc($pay['reference'] ?? '—') ?></td>
-                    <td class="right" style="color:#059669;"><?= number_format((float)$pay['amount'], 2) ?></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
-
-    <div style="margin-top:20px; padding:10px; background:#f9fafb; border: 1px solid #ddd; border-radius:4px;">
-        <strong>Status:</strong>
-        <?php if ($balance <= 0): ?>
-            <span class="badge badge-paid">FULLY PAID</span>
-        <?php else: ?>
-            <span class="badge badge-pending">BALANCE DUE: KES <?= number_format($balance, 2) ?></span>
-        <?php endif; ?>
-    </div>
 
     <hr>
 
     <div class="contact-info">
         <p><strong>Contact Us:</strong></p>
         <p>
-            MunyiraHQ<br>
+            Logia<br>
             Phone: +254 711 318 428<br>
             Email: jmunyira1@gmail.com
         </p>
@@ -296,7 +265,7 @@ $deliveryTotal = array_sum(array_column($project['delivery_items'], 'total_price
     <div class="footer">
         <p>Thank you for your business.<br>
             This is a computer-generated document. No signature is required.<br>
-            <small style="color: #888;">Generated via MunyiraHQ on <?= date('d M Y H:i') ?> · <?= $invoiceNo ?></small></p>
+            <small>Generated via Logia on <?= date('d M Y H:i') ?> · <?= $invoiceNo ?></small></p>
     </div>
 </div>
 

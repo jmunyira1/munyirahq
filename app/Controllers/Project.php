@@ -8,12 +8,11 @@ use App\Models\Party   as PartyModel;
 use App\Models\Account as AccountModel;
 
 class Project extends BaseController
-{
-    protected $db;
+{    protected $db;
 
     public function __construct()
     {
-        // Connect to the database and assign it to the property
+        // Initialize the database connection
         $this->db = \Config\Database::connect();
     }
     // ── Pages ─────────────────────────────────────────────────────────────────
@@ -186,20 +185,21 @@ class Project extends BaseController
         $data = [
             'project_id'  => $projectId,
             'title'       => $this->request->getPost('title'),
-            'amount'      => (float) $this->request->getPost('amount'),
+            'quantity'    => (int) $this->request->getPost('quantity') ?: 1,
+            'unit_price'  => (float) $this->request->getPost('unit_price'),
             'incurred_on' => $this->request->getPost('incurred_on'),
             'notes'       => $this->request->getPost('notes') ?: null,
             'created_at'  => date('Y-m-d H:i:s'),
         ];
 
-        if (empty($data['title']) || $data['amount'] <= 0 || empty($data['incurred_on'])) {
+        if (empty($data['title']) || $data['unit_price'] <= 0 || empty($data['incurred_on'])) {
             return $this->response->setStatusCode(422)
-                ->setJSON(['error' => 'Title, amount and date are required.']);
+                ->setJSON(['error' => 'Title, unit price and date are required.']);
         }
 
         $this->db->table('projectcosts')->insert($data);
 
-        return $this->_successResponse('refreshProjectCosts_' . $projectId, 'Cost added.');
+        return $this->_successResponse('refreshProjectStats_' . $projectId . ' refreshProjectCosts_' . $projectId, 'Cost added.');
     }
 
     public function destroyCost(int $costId)
@@ -212,7 +212,7 @@ class Project extends BaseController
 
         $this->db->table('projectcosts')->where('id', $costId)->delete();
 
-        return $this->_successResponse('refreshProjectCosts_' . $cost['project_id'], 'Cost deleted.');
+        return $this->_successResponse('refreshProjectStats_' . $cost['project_id'] . ' refreshProjectCosts_' . $cost['project_id'], 'Cost deleted.');
     }
 
     // ── Sub-resource: delivery items ──────────────────────────────────────────
@@ -233,7 +233,7 @@ class Project extends BaseController
 
         $this->db->table('projectdeliveryitems')->insert($data);
 
-        return $this->_successResponse('refreshDeliveryItems_' . $projectId, 'Item added.');
+        return $this->_successResponse('refreshProjectStats_' . $projectId . ' refreshDeliveryItems_' . $projectId, 'Item added.');
     }
 
     public function destroyDeliveryItem(int $itemId)
@@ -246,7 +246,7 @@ class Project extends BaseController
 
         $this->db->table('projectdeliveryitems')->where('id', $itemId)->delete();
 
-        return $this->_successResponse('refreshDeliveryItems_' . $item['project_id'], 'Item deleted.');
+        return $this->_successResponse('refreshProjectStats_' . $item['project_id'] . ' refreshDeliveryItems_' . $item['project_id'], 'Item deleted.');
     }
 
     // ── Sub-resource: payments ────────────────────────────────────────────────
@@ -280,7 +280,7 @@ class Project extends BaseController
 
         $this->db->table('projectpayments')->insert($data);
 
-        return $this->_successResponse('refreshProjectPayments_' . $projectId, 'Payment recorded.');
+        return $this->_successResponse('refreshProjectStats_' . $projectId . ' refreshProjectPayments_' . $projectId, 'Payment recorded.');
     }
 
     public function destroyPayment(int $paymentId)
@@ -408,6 +408,100 @@ class Project extends BaseController
             'projectId' => $projectId,
             'isActive'  => $project['status'] === 'active',
         ]);
+    }
+    // ── Stats partial ─────────────────────────────────────────────────────────
+
+    public function statsPartial(int $projectId)
+    {
+        $project = (new ProjectModel)->findWithDetails($projectId);
+        if (!$project) {
+            return $this->response->setStatusCode(404)->setBody('Project not found.');
+        }
+        return view('projects/partials/stats', ['project' => $project]);
+    }
+
+    // ── Update sub-resources ──────────────────────────────────────────────────
+
+    public function updateCost(int $costId)
+    {
+        $cost = $this->db->table('projectcosts')->where('id', $costId)->get()->getRowArray();
+        if (!$cost) {
+            return $this->response->setStatusCode(404)->setBody('Cost not found.');
+        }
+
+        $unitPrice = (float) $this->request->getPost('unit_price');
+        $quantity  = (int) $this->request->getPost('quantity') ?: 1;
+
+        if (empty($this->request->getPost('title')) || $unitPrice <= 0) {
+            return $this->response->setStatusCode(422)
+                ->setJSON(['error' => 'Title and unit price are required.']);
+        }
+
+        $this->db->table('projectcosts')->where('id', $costId)->update([
+            'title'       => $this->request->getPost('title'),
+            'quantity'    => $quantity,
+            'unit_price'  => $unitPrice,
+            'incurred_on' => $this->request->getPost('incurred_on'),
+            'notes'       => $this->request->getPost('notes') ?: null,
+        ]);
+
+        return $this->_successResponse(
+            'refreshProjectStats_' . $cost['project_id'] . ' refreshProjectCosts_' . $cost['project_id'],
+            'Cost updated.'
+        );
+    }
+
+    public function updateDeliveryItem(int $itemId)
+    {
+        $item = $this->db->table('projectdeliveryitems')->where('id', $itemId)->get()->getRowArray();
+        if (!$item) {
+            return $this->response->setStatusCode(404)->setBody('Item not found.');
+        }
+
+        $unitPrice = (float) $this->request->getPost('unit_price');
+        $quantity  = (int) $this->request->getPost('quantity') ?: 1;
+
+        if (empty($this->request->getPost('name')) || $unitPrice <= 0 || $quantity <= 0) {
+            return $this->response->setStatusCode(422)
+                ->setJSON(['error' => 'Name, quantity and unit price are required.']);
+        }
+
+        $this->db->table('projectdeliveryitems')->where('id', $itemId)->update([
+            'name'       => $this->request->getPost('name'),
+            'quantity'   => $quantity,
+            'unit_price' => $unitPrice,
+        ]);
+
+        return $this->_successResponse(
+            'refreshProjectStats_' . $item['project_id'] . ' refreshDeliveryItems_' . $item['project_id'],
+            'Item updated.'
+        );
+    }
+
+    public function updatePayment(int $paymentId)
+    {
+        $payment = $this->db->table('projectpayments')->where('id', $paymentId)->get()->getRowArray();
+        if (!$payment) {
+            return $this->response->setStatusCode(404)->setBody('Payment not found.');
+        }
+
+        $amount = (float) $this->request->getPost('amount');
+        if ($amount <= 0) {
+            return $this->response->setStatusCode(422)
+                ->setJSON(['error' => 'Payment amount must be greater than zero.']);
+        }
+
+        $this->db->table('projectpayments')->where('id', $paymentId)->update([
+            'amount'       => $amount,
+            'payment_date' => $this->request->getPost('payment_date') ?: date('Y-m-d H:i:s'),
+            'method'       => $this->request->getPost('method') ?: null,
+            'reference'    => $this->request->getPost('reference') ?: null,
+        ]);
+
+        return $this->_successResponse(
+            'refreshProjectStats_' . $payment['project_id'] . ' refreshProjectPayments_' . $payment['project_id'],
+            'Payment updated.'
+        );
     }
 
 }

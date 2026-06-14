@@ -115,6 +115,11 @@ $routes->post('project/payment/destroy/(:num)', 'Project::destroyPayment/$1', ['
 $routes->get('project/(:num)/invoice', 'Project::invoice/$1', ['as' => 'project.invoice']);
 $routes->get('project/(:num)/delivery-note', 'Project::deliveryNote/$1', ['as' => 'project.delivery_note']);
 
+// Stats partial (dynamic summary bar)
+$routes->get('project/(:num)/stats', 'Project::statsPartial/$1', ['as' => 'project.stats_partial']);
 
-
+// Update sub-resources
+$routes->post('project/cost/update/(:num)', 'Project::updateCost/$1', ['as' => 'project.update_cost']);
+$routes->post('project/delivery-item/update/(:num)', 'Project::updateDeliveryItem/$1', ['as' => 'project.update_delivery_item']);
+$routes->post('project/payment/update/(:num)', 'Project::updatePayment/$1', ['as' => 'project.update_payment']);
 service('auth')->routes($routes);
